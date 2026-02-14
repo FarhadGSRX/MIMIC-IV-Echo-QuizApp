@@ -4,9 +4,9 @@ Welcome! This is a simple, local web application for viewing and quizzing yourse
 
 You can watch echo videos, test your knowledge by answering clinical questions, and review the correct answers alongside the original diagnostic reports.
 
-![App Screenshot #1](assets/App Demo 1.png)
+![](https://raw.githubusercontent.com/FarhadGSRX/MIMIC-IV-Echo-QuizApp/refs/heads/main/assets/App%20Demo%201.png)
 
-![App Screenshot #2](assets/App Demo 2.png)
+![](https://raw.githubusercontent.com/FarhadGSRX/MIMIC-IV-Echo-QuizApp/refs/heads/main/assets/App%20Demo%202.png)
 
 ## Quickstart Guide
 Note: You must have Python installed on your computer to go any further. If you don't have that yet, please see below.
@@ -43,7 +43,7 @@ The echocardiogram data is confidential and requires free, credentialed access f
 1.  **Download the ZIP**: Once credentialed, go to the [MIMIC-IV-Echo dataset page](https://physionet.org/content/mimic-iv-echo-ext-mimicechoqa/1.0.0/) and download the complete dataset ZIP file:
     `mimic-iv-echo-ext-mimicechoqa-a-benchmark-dataset-for-echocardiogram-based-visual-question-answering-1.0.0.zip`
 
-![Downloading from PhysioNet](assets/PhysioNet DL.png)
+![](https://raw.githubusercontent.com/FarhadGSRX/MIMIC-IV-Echo-QuizApp/refs/heads/main/assets/PhysioNet%20DL.png)
 
 2.  **Place the File**: Move the downloaded `.zip` file into the main `MIMIC-IV-Echo-QuizApp` folder.
 3.  **Run the Setup Script**:
