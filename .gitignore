@@ -1,3 +1,4 @@
+public/data/*
 *.zip
 # Local environment or temp files
 .gemini/
