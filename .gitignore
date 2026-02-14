@@ -1,0 +1,4 @@
+*.zip
+# Local environment or temp files
+.gemini/
+tmp/

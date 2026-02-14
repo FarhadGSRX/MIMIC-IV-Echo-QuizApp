@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MIMIC-IV Echo Quiz App</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header>
+  <h1>MIMIC-IV EchoQA</h1>
+  <nav class="mode-tabs">
+    <button class="tab active" data-mode="quiz">Quiz Mode</button>
+    <button class="tab" data-mode="browse">Browse Questions</button>
+  </nav>
+</header>
+
+<main class="container">
+
+  <!-- Quiz Mode -->
+  <section id="quiz-mode">
+    <div class="quiz-layout">
+      <div class="video-panel">
+        <video id="echo-video" controls autoplay loop muted playsinline>
+          <source id="video-source" src="" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+        <div class="video-meta" id="video-meta"></div>
+      </div>
+
+      <div class="question-panel">
+        <h2 id="question-text" class="question-text"></h2>
+        <div id="options" class="options"></div>
+
+        <div id="answer-panel" class="answer-panel hidden">
+          <div class="answer-header">
+            <span class="answer-label">Correct Answer:</span>
+            <span id="correct-answer-text" class="answer-value"></span>
+          </div>
+          <div class="report-section">
+            <button id="report-toggle" class="report-toggle">Show Full Report</button>
+            <div id="report-content" class="report-content hidden">
+              <p id="report-text"></p>
+            </div>
+          </div>
+        </div>
+
+        <button id="next-btn" class="next-btn hidden">Next Question</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Browse Mode -->
+  <section id="browse-mode" class="hidden">
+    <div class="filters">
+      <div class="filter-group">
+        <label for="filter-structure">Cardiac Structure</label>
+        <select id="filter-structure">
+          <option value="">All Structures</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="filter-view">Echo View</label>
+        <select id="filter-view">
+          <option value="">All Views</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="filter-search">Search Questions</label>
+        <input type="text" id="filter-search" placeholder="Type to search...">
+      </div>
+      <div class="filter-group filter-count">
+        <span id="result-count"></span>
+      </div>
+    </div>
+
+    <table class="browse-table">
+      <thead>
+        <tr>
+          <th>Question</th>
+          <th>Structure</th>
+          <th>View</th>
+        </tr>
+      </thead>
+      <tbody id="browse-body"></tbody>
+    </table>
+  </section>
+
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
