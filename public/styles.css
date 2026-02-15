@@ -348,6 +348,144 @@ header h1 {
   border-bottom: none;
 }
 
+/* Stats Mode */
+.stats-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stats-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1.25rem;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.stats-card-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.stats-card-value.stats-correct {
+  color: #2e7d32;
+}
+
+.stats-card-value.stats-incorrect {
+  color: #c62828;
+}
+
+.stats-card-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #777;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 0.25rem;
+}
+
+.progress-bar-track {
+  margin-top: 0.75rem;
+  height: 8px;
+  background: #e8edf3;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: #4a90d9;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+  width: 0%;
+}
+
+.stats-section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: #1a1a2e;
+}
+
+.stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  margin-bottom: 2rem;
+}
+
+.stats-table thead {
+  background: #1a1a2e;
+  color: #fff;
+}
+
+.stats-table th {
+  padding: 0.6rem 1rem;
+  text-align: left;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.stats-table td {
+  padding: 0.55rem 1rem;
+  font-size: 0.88rem;
+  border-bottom: 1px solid #eee;
+}
+
+.stats-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.stats-reset {
+  text-align: center;
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+}
+
+.reset-btn {
+  padding: 0.6rem 1.5rem;
+  background: #fff;
+  color: #c62828;
+  border: 2px solid #c62828;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.reset-btn:hover {
+  background: #c62828;
+  color: #fff;
+}
+
+.completed-message {
+  font-size: 1rem;
+  color: #555;
+  line-height: 1.6;
+  margin-top: 0.5rem;
+}
+
+.completed-message a {
+  color: #4a90d9;
+  font-weight: 600;
+}
+
+/* Responsive: Stats cards stack on mobile */
+@media (max-width: 600px) {
+  .stats-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 /* Utility */
 .hidden {
   display: none !important;

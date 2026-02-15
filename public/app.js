@@ -6,9 +6,43 @@
   let answered = false;
   let browseFiltered = [];
 
+  // ---- Progress Tracking ----
+
+  const PROGRESS_KEY = "echoQuizProgress";
+
+  function loadProgress() {
+    try {
+      const raw = localStorage.getItem(PROGRESS_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (e) { /* ignore corrupt data */ }
+    return { results: {} };
+  }
+
+  function saveResult(id, correct) {
+    const progress = loadProgress();
+    progress.results[id] = { correct: correct, answeredAt: Date.now() };
+    localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress));
+  }
+
+  function resetProgress() {
+    localStorage.removeItem(PROGRESS_KEY);
+  }
+
+  function getStats() {
+    const progress = loadProgress();
+    const results = Object.values(progress.results);
+    const total = data.length;
+    const answeredCount = results.length;
+    const correctCount = results.filter(function (r) { return r.correct; }).length;
+    const incorrectCount = answeredCount - correctCount;
+    const accuracy = answeredCount > 0 ? Math.round((correctCount / answeredCount) * 100) : 0;
+    return { total: total, answered: answeredCount, correct: correctCount, incorrect: incorrectCount, accuracy: accuracy };
+  }
+
   // DOM refs
   const quizSection = document.getElementById("quiz-mode");
   const browseSection = document.getElementById("browse-mode");
+  const statsSection = document.getElementById("stats-mode");
   const tabs = document.querySelectorAll(".tab");
   const video = document.getElementById("echo-video");
   const videoSource = document.getElementById("video-source");
@@ -30,30 +64,36 @@
   // ---- Init ----
 
   fetch("data/MIMICEchoQA.json")
-    .then((r) => r.json())
-    .then((json) => {
+    .then(function (r) { return r.json(); })
+    .then(function (json) {
       data = json;
       populateFilters();
       loadRandomQuestion();
     })
-    .catch((err) => {
+    .catch(function (err) {
       questionText.textContent = "Failed to load data: " + err.message;
     });
 
   // ---- Mode switching ----
 
-  tabs.forEach((tab) => {
-    tab.addEventListener("click", () => {
-      tabs.forEach((t) => t.classList.remove("active"));
+  var allSections = [quizSection, browseSection, statsSection];
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener("click", function () {
+      tabs.forEach(function (t) { t.classList.remove("active"); });
       tab.classList.add("active");
-      const mode = tab.dataset.mode;
+      var mode = tab.dataset.mode;
+
+      allSections.forEach(function (s) { s.classList.add("hidden"); });
+
       if (mode === "quiz") {
         quizSection.classList.remove("hidden");
-        browseSection.classList.add("hidden");
-      } else {
-        quizSection.classList.add("hidden");
+      } else if (mode === "browse") {
         browseSection.classList.remove("hidden");
         applyFilters();
+      } else if (mode === "stats") {
+        statsSection.classList.remove("hidden");
+        renderStats();
       }
     });
   });
@@ -65,10 +105,10 @@
     answered = false;
 
     // Video
-    const videoPath = item.videos[0];
+    var videoPath = item.videos[0];
     videoSource.src = videoPath;
     video.load();
-    video.play().catch(() => {});
+    video.play().catch(function () {});
 
     // Meta tags
     videoMeta.innerHTML = "";
@@ -84,15 +124,15 @@
 
     // Options
     optionsContainer.innerHTML = "";
-    const letters = ["A", "B", "C", "D"];
-    letters.forEach((letter) => {
-      const text = item["option_" + letter];
-      if (!text) return; // skip empty options (some questions have only 2)
-      const btn = document.createElement("button");
+    var letters = ["A", "B", "C", "D"];
+    letters.forEach(function (letter) {
+      var text = item["option_" + letter];
+      if (!text) return;
+      var btn = document.createElement("button");
       btn.className = "option-btn";
       btn.innerHTML =
         '<span class="option-letter">' + letter + "</span><span>" + escapeHtml(text) + "</span>";
-      btn.addEventListener("click", () => handleAnswer(letter, btn));
+      btn.addEventListener("click", function () { handleAnswer(letter, btn); });
       optionsContainer.appendChild(btn);
     });
 
@@ -104,26 +144,57 @@
   }
 
   function loadRandomQuestion() {
-    const idx = Math.floor(Math.random() * data.length);
-    loadQuestion(data[idx]);
+    var progress = loadProgress();
+    var unanswered = data.filter(function (item) {
+      return !progress.results[item.messages_id];
+    });
+
+    if (unanswered.length === 0 && data.length > 0) {
+      // All questions answered
+      questionText.textContent = "All " + data.length + " questions completed!";
+      optionsContainer.innerHTML = '<p class="completed-message">You\'ve answered every question. Visit the <a href="#" id="go-to-stats">Stats tab</a> to review your performance, or reset your progress to start again.</p>';
+      var statsLink = document.getElementById("go-to-stats");
+      if (statsLink) {
+        statsLink.addEventListener("click", function (e) {
+          e.preventDefault();
+          // Activate stats tab
+          tabs.forEach(function (t) { t.classList.remove("active"); });
+          tabs[2].classList.add("active");
+          allSections.forEach(function (s) { s.classList.add("hidden"); });
+          statsSection.classList.remove("hidden");
+          renderStats();
+        });
+      }
+      videoMeta.innerHTML = "";
+      answerPanel.classList.add("hidden");
+      nextBtn.classList.add("hidden");
+      return;
+    }
+
+    var idx = Math.floor(Math.random() * unanswered.length);
+    loadQuestion(unanswered[idx]);
   }
 
   function handleAnswer(letter, clickedBtn) {
     if (answered) return;
     answered = true;
 
-    const correct = currentItem.correct_option;
+    var correct = currentItem.correct_option;
+    var isCorrect = letter === correct;
+
+    // Record progress
+    saveResult(currentItem.messages_id, isCorrect);
 
     // Mark all buttons
-    optionsContainer.querySelectorAll(".option-btn").forEach((btn) => {
+    optionsContainer.querySelectorAll(".option-btn").forEach(function (btn) {
       btn.classList.add("disabled");
-      const btnLetter = btn.querySelector(".option-letter").textContent;
+      var btnLetter = btn.querySelector(".option-letter").textContent;
       if (btnLetter === correct) {
         btn.classList.add("correct");
       }
     });
 
-    if (letter !== correct) {
+    if (!isCorrect) {
       clickedBtn.classList.add("incorrect");
     }
 
@@ -135,13 +206,13 @@
   }
 
   // Report toggle
-  reportToggle.addEventListener("click", () => {
-    const isHidden = reportContent.classList.toggle("hidden");
+  reportToggle.addEventListener("click", function () {
+    var isHidden = reportContent.classList.toggle("hidden");
     reportToggle.textContent = isHidden ? "Show Full Report" : "Hide Report";
   });
 
   // Next question
-  nextBtn.addEventListener("click", () => {
+  nextBtn.addEventListener("click", function () {
     loadRandomQuestion();
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
@@ -149,18 +220,25 @@
   // ---- Browse Mode ----
 
   function populateFilters() {
-    const structures = [...new Set(data.map((d) => d.structure).filter(Boolean))].sort();
-    const views = [...new Set(data.map((d) => d.view).filter(Boolean))].sort();
+    var structures = [].concat(new Set(data.map(function (d) { return d.structure; }).filter(Boolean)));
+    // Set dedup
+    var structSet = {};
+    data.forEach(function (d) { if (d.structure) structSet[d.structure] = true; });
+    var structList = Object.keys(structSet).sort();
 
-    structures.forEach((s) => {
-      const opt = document.createElement("option");
+    var viewSet = {};
+    data.forEach(function (d) { if (d.view) viewSet[d.view] = true; });
+    var viewList = Object.keys(viewSet).sort();
+
+    structList.forEach(function (s) {
+      var opt = document.createElement("option");
       opt.value = s;
       opt.textContent = s;
       filterStructure.appendChild(opt);
     });
 
-    views.forEach((v) => {
-      const opt = document.createElement("option");
+    viewList.forEach(function (v) {
+      var opt = document.createElement("option");
       opt.value = v;
       opt.textContent = v;
       filterView.appendChild(opt);
@@ -168,11 +246,11 @@
   }
 
   function applyFilters() {
-    const struct = filterStructure.value;
-    const view = filterView.value;
-    const search = filterSearch.value.toLowerCase().trim();
+    var struct = filterStructure.value;
+    var view = filterView.value;
+    var search = filterSearch.value.toLowerCase().trim();
 
-    browseFiltered = data.filter((item) => {
+    browseFiltered = data.filter(function (item) {
       if (struct && item.structure !== struct) return false;
       if (view && item.view !== view) return false;
       if (search && !item.question.toLowerCase().includes(search)) return false;
@@ -185,17 +263,17 @@
 
   function renderBrowseTable() {
     browseBody.innerHTML = "";
-    browseFiltered.forEach((item, i) => {
-      const tr = document.createElement("tr");
+    browseFiltered.forEach(function (item) {
+      var tr = document.createElement("tr");
       tr.innerHTML =
         "<td>" + escapeHtml(item.question) + "</td>" +
         "<td>" + escapeHtml(item.structure || "") + "</td>" +
         "<td>" + escapeHtml(item.view || "") + "</td>";
-      tr.addEventListener("click", () => {
+      tr.addEventListener("click", function () {
         // Switch to quiz mode with this item
-        tabs.forEach((t) => t.classList.remove("active"));
+        tabs.forEach(function (t) { t.classList.remove("active"); });
         tabs[0].classList.add("active");
-        browseSection.classList.add("hidden");
+        allSections.forEach(function (s) { s.classList.add("hidden"); });
         quizSection.classList.remove("hidden");
         loadQuestion(item);
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -208,17 +286,79 @@
   filterView.addEventListener("change", applyFilters);
   filterSearch.addEventListener("input", applyFilters);
 
+  // ---- Stats Mode ----
+
+  function renderStats() {
+    var stats = getStats();
+    var progress = loadProgress();
+
+    // Summary cards
+    document.getElementById("stats-answered").textContent = stats.answered + " / " + stats.total;
+    document.getElementById("stats-correct").textContent = stats.correct;
+    document.getElementById("stats-incorrect").textContent = stats.incorrect;
+    document.getElementById("stats-accuracy").textContent = stats.accuracy + "%";
+
+    // Progress bar
+    var pct = stats.total > 0 ? (stats.answered / stats.total) * 100 : 0;
+    document.getElementById("stats-progress-bar").style.width = pct + "%";
+
+    // Breakdown by structure
+    renderBreakdownTable("stats-by-structure", "structure", progress);
+
+    // Breakdown by view
+    renderBreakdownTable("stats-by-view", "view", progress);
+  }
+
+  function renderBreakdownTable(tbodyId, field, progress) {
+    var tbody = document.getElementById(tbodyId);
+    tbody.innerHTML = "";
+
+    // Group data items by field
+    var groups = {};
+    data.forEach(function (item) {
+      var key = item[field] || "Unknown";
+      if (!groups[key]) groups[key] = { total: 0, answered: 0, correct: 0 };
+      groups[key].total++;
+      var result = progress.results[item.messages_id];
+      if (result) {
+        groups[key].answered++;
+        if (result.correct) groups[key].correct++;
+      }
+    });
+
+    var keys = Object.keys(groups).sort();
+    keys.forEach(function (key) {
+      var g = groups[key];
+      var acc = g.answered > 0 ? Math.round((g.correct / g.answered) * 100) + "%" : "-";
+      var tr = document.createElement("tr");
+      tr.innerHTML =
+        "<td>" + escapeHtml(key) + "</td>" +
+        "<td>" + g.answered + " / " + g.total + "</td>" +
+        "<td>" + g.correct + "</td>" +
+        "<td>" + acc + "</td>";
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Reset button
+  document.getElementById("reset-progress-btn").addEventListener("click", function () {
+    if (confirm("Reset all progress? This will clear your answer history and cannot be undone.")) {
+      resetProgress();
+      renderStats();
+    }
+  });
+
   // ---- Helpers ----
 
   function makeTag(text) {
-    const span = document.createElement("span");
+    var span = document.createElement("span");
     span.className = "meta-tag";
     span.textContent = text;
     return span;
   }
 
   function escapeHtml(str) {
-    const div = document.createElement("div");
+    var div = document.createElement("div");
     div.appendChild(document.createTextNode(str));
     return div.innerHTML;
   }

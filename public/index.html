@@ -13,6 +13,7 @@
   <nav class="mode-tabs">
     <button class="tab active" data-mode="quiz">Quiz Mode</button>
     <button class="tab" data-mode="browse">Browse Questions</button>
+    <button class="tab" data-mode="stats">Stats</button>
   </nav>
 </header>
 
@@ -85,6 +86,61 @@
       </thead>
       <tbody id="browse-body"></tbody>
     </table>
+  </section>
+
+  <!-- Stats Mode -->
+  <section id="stats-mode" class="hidden">
+    <div class="stats-summary">
+      <div class="stats-card">
+        <div class="stats-card-value" id="stats-answered">0 / 0</div>
+        <div class="stats-card-label">Questions Answered</div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="stats-progress-bar"></div>
+        </div>
+      </div>
+      <div class="stats-card">
+        <div class="stats-card-value stats-correct" id="stats-correct">0</div>
+        <div class="stats-card-label">Correct</div>
+      </div>
+      <div class="stats-card">
+        <div class="stats-card-value stats-incorrect" id="stats-incorrect">0</div>
+        <div class="stats-card-label">Incorrect</div>
+      </div>
+      <div class="stats-card">
+        <div class="stats-card-value" id="stats-accuracy">0%</div>
+        <div class="stats-card-label">Accuracy</div>
+      </div>
+    </div>
+
+    <h3 class="stats-section-title">By Cardiac Structure</h3>
+    <table class="stats-table">
+      <thead>
+        <tr>
+          <th>Structure</th>
+          <th>Answered</th>
+          <th>Correct</th>
+          <th>Accuracy</th>
+        </tr>
+      </thead>
+      <tbody id="stats-by-structure"></tbody>
+    </table>
+
+    <h3 class="stats-section-title">By Echo View</h3>
+    <table class="stats-table">
+      <thead>
+        <tr>
+          <th>View</th>
+          <th>Answered</th>
+          <th>Correct</th>
+          <th>Accuracy</th>
+        </tr>
+      </thead>
+      <tbody id="stats-by-view"></tbody>
+    </table>
+
+    <div class="stats-reset">
+      <button id="reset-progress-btn" class="reset-btn">Reset All Progress</button>
+    </div>
   </section>
 
 </main>
