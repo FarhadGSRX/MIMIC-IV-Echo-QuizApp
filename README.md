@@ -64,15 +64,6 @@ The script will handle extracting the files, organizing them into the `data/` fo
 
 ---
 
-## For Developers
-
-This is a simple vanilla JS/HTML/CSS application.
-
-*   **`public/`**: Contains the frontend application (`index.html`, `app.js`, `styles.css`).
-*   **`scripts/prepare_data.py`**: A Python script to process the raw data from PhysioNet. It cleans the JSON and restructures video paths, placing the final, app-ready files into `public/data`.
-*   **`start.bat`**: A simple launcher for Windows users that provides a menu to either run the preparation script or start the server.
-*   **Web Server**: The `start.bat` script uses `python -m http.server 8000` from within the `public` directory. A server is required because browser security policies (CORS) prevent `fetch()` from loading local files directly (`file://`).
-
 ## License
 See the `LICENSE` file for more info.
 
